@@ -1,0 +1,47 @@
+name : "recipe-sharing-mern-app"
+
+services:
+ mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    container_name: mongodb_server
+    networks:
+      - app-network
+    
+ server:
+   build:
+     context: ./server
+     dockerfile: Dockerfile
+   container_name: recipe-sharing-backend
+   command: npm start
+   volumes:
+      - ./server/:/app
+      - /app/node_modules
+   env_file: ./server/.env
+   depends_on:
+      - mongodb
+   networks:
+      - app-network
+   ports:
+      - "8626:8626"
+ client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    container_name: recipe-sharing-frontend
+    networks:
+      - app-network
+
+networks:
+    app-network:
+        driver: bridge
+volumes: 
+  mongo_data:
+
